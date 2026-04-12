@@ -39,6 +39,22 @@ Future<void> addTaskToFirestore(String title) async {
   }); // No setState() needed here - the stream will push the new doc
 }
 
+// Toggle isCompleted in Firestore
+Future<void> toggleTask(Task task) async {
+    await FirebaseFirestore.instance
+      .collection('tasks')
+      .doc(task.id)
+      .update({'isCompleted': !task.isCompleted});
+}
+
+// Permanently delete a task
+Future<void> deleteTask(String taskId) async {
+    await FirebaseFirestore.instance
+      .collection('tasks')
+      .doc(taskId)
+      .delete();
+}
+
   @override
   void dispose() {
     _taskController.dispose(); // IMPORTANT: always dispose controllers
