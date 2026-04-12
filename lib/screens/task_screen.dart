@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/task.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
@@ -10,6 +12,32 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> {
   final TextEditingController _taskController = TextEditingController();
   List<Task> _tasks = [];
+
+// -- Local state version -------------
+  void _addTask() {
+    final title = _taskController.text.trim();
+    if(title.isEmpty) return; // Block empty submissions
+
+    setState(() {
+      _tasks.add(Task(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: title,
+        createdAt: DateTime.now()
+      ));
+    });
+  }
+
+// -- Firestore version -----------------
+Future<void> addTaskToFirestore(String title) async {
+  if (title.trim().isEmpty) return; // Same validation rule
+
+  await FirebaseFirestore.instance.collection('tasks').add({
+    'title': title.trim(),
+    'isCompleted': false,
+    'subtasks': [],
+    'createdAt': DateTime.now().toIso8601String()
+  }); // No setState() needed here - the stream will push the new doc
+}
 
   @override
   void dispose() {
